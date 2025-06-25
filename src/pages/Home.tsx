@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, User } from 'lucide-react';
+import { Calendar, User, Star, Heart, Award } from 'lucide-react';
 
 const Home = () => {
   const services = [
@@ -47,6 +47,24 @@ const Home = () => {
     }
   ];
 
+  const features = [
+    {
+      icon: Star,
+      title: "Qualité Premium",
+      description: "Matériaux et décorations de haute qualité pour vos événements"
+    },
+    {
+      icon: Heart,
+      title: "Service Personnalisé",
+      description: "Chaque événement est unique, notre approche aussi"
+    },
+    {
+      icon: Award,
+      title: "Expertise Reconnue",
+      description: "Plus de 5 ans d'expérience dans la décoration d'événements"
+    }
+  ];
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -54,20 +72,20 @@ const Home = () => {
         <div 
           className="absolute inset-0 bg-cover bg-center bg-fixed"
           style={{
-            backgroundImage: "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1500673922987-e212871fec22?w=1920&h=1080&fit=crop')"
+            backgroundImage: "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1920&h=1080&fit=crop')"
           }}
         />
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
           <h1 className="font-playfair text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
             Créons Ensemble Vos
-            <span className="block gradient-text text-rose-gold">Événements de Rêve</span>
+            <span className="block gradient-text">Événements de Rêve</span>
           </h1>
           <p className="text-xl md:text-2xl mb-8 opacity-90 animate-slide-in">
             Des décorations élégantes et personnalisées pour tous vos moments précieux
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
             <Link to="/services">
-              <Button size="lg" className="bg-rose-gold hover:bg-rose-gold/90 text-white px-8 py-4 text-lg">
+              <Button size="lg" className="gradient-primary text-white px-8 py-4 text-lg hover:opacity-90">
                 <Calendar className="mr-2 h-5 w-5" />
                 Découvrir nos Services
               </Button>
@@ -78,6 +96,36 @@ const Home = () => {
                 Créer un Compte
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 gradient-bg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="font-playfair text-4xl md:text-5xl font-bold text-charcoal mb-4">
+              Pourquoi Choisir MelEvent ?
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Notre expertise et notre passion pour la perfection font la différence
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <Card key={index} className="text-center hover-lift bg-white/90 border-0 shadow-lg">
+                <CardContent className="p-8">
+                  <feature.icon className="h-16 w-16 text-rose-gold mx-auto mb-4" />
+                  <h3 className="font-playfair text-2xl font-semibold text-charcoal mb-3">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600">
+                    {feature.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
@@ -116,7 +164,7 @@ const Home = () => {
                       {service.price}
                     </span>
                     <Link to="/services">
-                      <Button className="bg-rose-gold hover:bg-rose-gold/90 text-white">
+                      <Button className="gradient-primary text-white hover:opacity-90">
                         En savoir plus
                       </Button>
                     </Link>
@@ -146,7 +194,7 @@ const Home = () => {
                 <CardContent className="p-6">
                   <div className="flex mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <span key={i} className="text-rose-gold text-xl">★</span>
+                      <Star key={i} className="text-rose-gold h-5 w-5 fill-current" />
                     ))}
                   </div>
                   <p className="text-gray-700 mb-4 italic">
@@ -164,7 +212,7 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-rose-gold to-warm-gold">
+      <section className="py-20 gradient-primary">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="font-playfair text-4xl md:text-5xl font-bold text-white mb-6">
             Prêt à Créer Votre Événement ?

@@ -3,77 +3,46 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, User } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { CalendarIcon, MapPin, Users, Clock, Send, CheckCircle } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { useToast } from '@/hooks/use-toast';
 
 const Reservations = () => {
+  const [selectedDate, setSelectedDate] = useState<Date>();
   const [formData, setFormData] = useState({
+    service: '',
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
     eventType: '',
-    eventDate: '',
+    location: '',
     guestCount: '',
+    duration: '',
     budget: '',
-    venue: '',
-    message: ''
+    description: '',
+    urgency: 'normal'
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { toast } = useToast();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    // Simulation d'une réservation
-    setTimeout(() => {
-      console.log('Données de réservation:', formData);
-      toast({
-        title: "Demande envoyée !",
-        description: "Nous vous contacterons dans les 24h pour confirmer votre réservation.",
-      });
-      setIsLoading(false);
-      // Reset form
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        eventType: '',
-        eventDate: '',
-        guestCount: '',
-        budget: '',
-        venue: '',
-        message: ''
-      });
-    }, 2000);
-  };
-
-  const eventTypes = [
-    { value: 'mariage', label: 'Mariage' },
-    { value: 'anniversaire', label: 'Anniversaire' },
-    { value: 'corporate', label: 'Événement Corporatif' },
-    { value: 'babyshower', label: 'Baby Shower' },
-    { value: 'reception', label: 'Réception Privée' },
-    { value: 'saisonnier', label: 'Événement Saisonnier' },
-    { value: 'autre', label: 'Autre' }
+  const services = [
+    { value: 'mariage-essentiel', label: 'Pack Mariage Essentiel - 1 500€', category: 'Mariage' },
+    { value: 'mariage-premium', label: 'Pack Mariage Premium - 3 500€', category: 'Mariage' },
+    { value: 'corporatif', label: 'Événement Corporatif - 800€', category: 'Corporate' },
+    { value: 'anniversaire-festif', label: 'Anniversaire Festif - 400€', category: 'Anniversaire' },
+    { value: 'anniversaire-elegant', label: 'Anniversaire Élégant - 750€', category: 'Anniversaire' },
+    { value: 'baby-shower', label: 'Baby Shower - 350€', category: 'Autre' },
+    { value: 'personnalise', label: 'Service Personnalisé - Devis sur mesure', category: 'Personnalisé' }
   ];
 
   const budgetRanges = [
@@ -84,290 +53,399 @@ const Reservations = () => {
     { value: '5000+', label: 'Plus de 5 000€' }
   ];
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const validateForm = () => {
+    const required = ['service', 'firstName', 'lastName', 'email', 'phone', 'eventType', 'location', 'guestCount'];
+    for (const field of required) {
+      if (!formData[field as keyof typeof formData]) {
+        return false;
+      }
+    }
+    return selectedDate && formData.email.includes('@');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs obligatoires",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Simulation d'envoi
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setIsSubmitted(true);
+      toast({
+        title: "Demande envoyée !",
+        description: "Nous vous contacterons dans les 24h pour confirmer votre réservation.",
+      });
+
+      console.log('Réservation soumise:', { ...formData, date: selectedDate });
+      
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue. Veuillez réessayer.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen gradient-bg flex items-center justify-center px-4">
+        <Card className="max-w-md mx-auto shadow-2xl border-0 bg-white/95">
+          <CardContent className="p-8 text-center">
+            <CheckCircle className="h-16 w-16 text-rose-gold mx-auto mb-4" />
+            <h2 className="font-playfair text-2xl font-bold text-charcoal mb-4">
+              Demande Envoyée !
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Merci pour votre confiance. Notre équipe vous contactera dans les 24h pour confirmer les détails de votre événement.
+            </p>
+            <Button 
+              onClick={() => {
+                setIsSubmitted(false);
+                setFormData({
+                  service: '', firstName: '', lastName: '', email: '', phone: '',
+                  eventType: '', location: '', guestCount: '', duration: '', budget: '',
+                  description: '', urgency: 'normal'
+                });
+                setSelectedDate(undefined);
+              }}
+              className="gradient-primary text-white hover:opacity-90"
+            >
+              Nouvelle Demande
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-cream">
-      {/* Header Section */}
-      <section className="py-20 bg-gradient-to-r from-rose-gold to-warm-gold">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-playfair text-5xl md:text-6xl font-bold text-white mb-6">
+    <div className="min-h-screen gradient-bg py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="font-playfair text-4xl md:text-5xl font-bold text-charcoal mb-4">
             Réserver Votre Événement
           </h1>
-          <p className="text-xl text-white/90">
-            Remplissez le formulaire ci-dessous et nous vous contacterons pour discuter de votre projet
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Remplissez ce formulaire pour nous faire part de vos besoins. Notre équipe vous contactera rapidement pour finaliser votre projet.
           </p>
         </div>
-      </section>
 
-      {/* Formulaire de réservation */}
-      <section className="py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="bg-white shadow-xl border-0">
-            <CardHeader className="text-center">
-              <CardTitle className="font-playfair text-3xl text-charcoal">
-                Demande de Réservation
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Service Selection */}
+          <Card className="shadow-lg border-0 bg-white/95">
+            <CardHeader>
+              <CardTitle className="font-playfair text-2xl text-charcoal">
+                1. Choisir un Service
               </CardTitle>
-              <CardDescription className="text-lg">
-                Partagez-nous les détails de votre événement pour recevoir un devis personnalisé
+              <CardDescription>
+                Sélectionnez le service qui correspond le mieux à vos besoins
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-8">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Informations personnelles */}
-                <div className="space-y-4">
-                  <h3 className="font-playfair text-xl font-semibold text-charcoal border-b border-rose-gold/20 pb-2">
-                    Vos Informations
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName" className="text-charcoal font-medium">
-                        Prénom *
-                      </Label>
-                      <Input
-                        id="firstName"
-                        name="firstName"
-                        type="text"
-                        required
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold"
-                        placeholder="Marie"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName" className="text-charcoal font-medium">
-                        Nom *
-                      </Label>
-                      <Input
-                        id="lastName"
-                        name="lastName"
-                        type="text"
-                        required
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold"
-                        placeholder="Dupont"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-charcoal font-medium">
-                        Email *
-                      </Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        required
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold"
-                        placeholder="marie.dupont@email.com"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-charcoal font-medium">
-                        Téléphone *
-                      </Label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        required
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold"
-                        placeholder="+33 1 23 45 67 89"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Détails de l'événement */}
-                <div className="space-y-4">
-                  <h3 className="font-playfair text-xl font-semibold text-charcoal border-b border-rose-gold/20 pb-2">
-                    Détails de l'Événement
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="eventType" className="text-charcoal font-medium">
-                        Type d'événement *
-                      </Label>
-                      <Select value={formData.eventType} onValueChange={(value) => handleSelectChange('eventType', value)}>
-                        <SelectTrigger className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold">
-                          <SelectValue placeholder="Sélectionnez un type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {eventTypes.map((type) => (
-                            <SelectItem key={type.value} value={type.value}>
-                              {type.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="eventDate" className="text-charcoal font-medium">
-                        Date souhaitée *
-                      </Label>
-                      <Input
-                        id="eventDate"
-                        name="eventDate"
-                        type="date"
-                        required
-                        value={formData.eventDate}
-                        onChange={handleInputChange}
-                        className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="guestCount" className="text-charcoal font-medium">
-                        Nombre d'invités *
-                      </Label>
-                      <Input
-                        id="guestCount"
-                        name="guestCount"
-                        type="number"
-                        required
-                        value={formData.guestCount}
-                        onChange={handleInputChange}
-                        className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold"
-                        placeholder="50"
-                        min="1"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="budget" className="text-charcoal font-medium">
-                        Budget estimé
-                      </Label>
-                      <Select value={formData.budget} onValueChange={(value) => handleSelectChange('budget', value)}>
-                        <SelectTrigger className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold">
-                          <SelectValue placeholder="Sélectionnez votre budget" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {budgetRanges.map((range) => (
-                            <SelectItem key={range.value} value={range.value}>
-                              {range.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="venue" className="text-charcoal font-medium">
-                      Lieu de l'événement
-                    </Label>
-                    <Input
-                      id="venue"
-                      name="venue"
-                      type="text"
-                      value={formData.venue}
-                      onChange={handleInputChange}
-                      className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold"
-                      placeholder="Adresse ou nom du lieu"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="message" className="text-charcoal font-medium">
-                      Message (optionnel)
-                    </Label>
-                    <Textarea
-                      id="message"
-                      name="message"
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold min-h-32"
-                      placeholder="Décrivez votre vision, vos préférences, ou toute information importante..."
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-6 border-t border-gray-200">
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-rose-gold hover:bg-rose-gold/90 text-white py-4 text-lg"
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center">
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                        Envoi en cours...
-                      </div>
-                    ) : (
-                      <>
-                        <Calendar className="mr-2 h-5 w-5" />
-                        Envoyer ma Demande
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </form>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-4">
+                <Label htmlFor="service">Service souhaité *</Label>
+                <Select value={formData.service} onValueChange={(value) => handleSelectChange('service', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choisir un service" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {services.map((service) => (
+                      <SelectItem key={service.value} value={service.value}>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {service.category}
+                          </Badge>
+                          {service.label}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </CardContent>
           </Card>
-        </div>
-      </section>
 
-      {/* Informations supplémentaires */}
-      <section className="py-12 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <h2 className="font-playfair text-3xl font-bold text-charcoal mb-4">
-              Comment ça marche ?
-            </h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-rose-gold/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <User className="h-8 w-8 text-rose-gold" />
+          {/* Personal Information */}
+          <Card className="shadow-lg border-0 bg-white/95">
+            <CardHeader>
+              <CardTitle className="font-playfair text-2xl text-charcoal">
+                2. Informations Personnelles
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="firstName">Prénom *</Label>
+                  <Input
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    placeholder="Votre prénom"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lastName">Nom *</Label>
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    placeholder="Votre nom"
+                    required
+                  />
+                </div>
               </div>
-              <h3 className="font-playfair text-xl font-semibold text-charcoal mb-2">
-                1. Envoyez votre demande
-              </h3>
-              <p className="text-gray-600">
-                Remplissez le formulaire avec les détails de votre événement
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <div className="bg-rose-gold/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Calendar className="h-8 w-8 text-rose-gold" />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="votre@email.com"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">Téléphone *</Label>
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    placeholder="+33 1 23 45 67 89"
+                    required
+                  />
+                </div>
               </div>
-              <h3 className="font-playfair text-xl font-semibold text-charcoal mb-2">
-                2. Consultation personnalisée
-              </h3>
-              <p className="text-gray-600">
-                Nous vous contactons pour affiner votre projet et établir un devis
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <div className="bg-rose-gold/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-rose-gold text-2xl font-bold">✨</span>
+            </CardContent>
+          </Card>
+
+          {/* Event Details */}
+          <Card className="shadow-lg border-0 bg-white/95">
+            <CardHeader>
+              <CardTitle className="font-playfair text-2xl text-charcoal">
+                3. Détails de l'Événement
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Date de l'événement *</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDate ? format(selectedDate, 'PPP', { locale: fr }) : "Choisir une date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={setSelectedDate}
+                        initialFocus
+                        locale={fr}
+                        disabled={(date) => date < new Date()}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                <div>
+                  <Label htmlFor="eventType">Type d'événement *</Label>
+                  <Input
+                    id="eventType"
+                    name="eventType"
+                    value={formData.eventType}
+                    onChange={handleInputChange}
+                    placeholder="Ex: Mariage, Anniversaire, Événement corporate..."
+                    required
+                  />
+                </div>
               </div>
-              <h3 className="font-playfair text-xl font-semibold text-charcoal mb-2">
-                3. Réalisation magique
-              </h3>
-              <p className="text-gray-600">
-                Nous créons la décoration de vos rêves pour un événement inoubliable
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="location">Lieu de l'événement *</Label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="location"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleInputChange}
+                      placeholder="Adresse ou ville"
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="guestCount">Nombre d'invités *</Label>
+                  <div className="relative">
+                    <Users className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="guestCount"
+                      name="guestCount"
+                      type="number"
+                      value={formData.guestCount}
+                      onChange={handleInputChange}
+                      placeholder="Ex: 50"
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="duration">Durée estimée</Label>
+                  <div className="relative">
+                    <Clock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="duration"
+                      name="duration"
+                      value={formData.duration}
+                      onChange={handleInputChange}
+                      placeholder="Ex: 6 heures"
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="budget">Budget approximatif</Label>
+                  <Select value={formData.budget} onValueChange={(value) => handleSelectChange('budget', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner un budget" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {budgetRanges.map((range) => (
+                        <SelectItem key={range.value} value={range.value}>
+                          {range.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Additional Information */}
+          <Card className="shadow-lg border-0 bg-white/95">
+            <CardHeader>
+              <CardTitle className="font-playfair text-2xl text-charcoal">
+                4. Informations Complémentaires
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="description">Description de votre projet</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder="Décrivez votre vision, vos couleurs préférées, le style souhaité, ou tout autre détail important..."
+                  rows={4}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="urgency">Urgence de la demande</Label>
+                <Select value={formData.urgency} onValueChange={(value) => handleSelectChange('urgency', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="normal">Normal - Réponse sous 24h</SelectItem>
+                    <SelectItem value="urgent">Urgent - Réponse sous 4h</SelectItem>
+                    <SelectItem value="flexible">Flexible - Pas pressé</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Submit */}
+          <Card className="shadow-lg border-0 bg-white/95">
+            <CardContent className="p-6">
+              {!validateForm() && (
+                <Alert className="mb-4">
+                  <AlertDescription>
+                    Veuillez remplir tous les champs marqués d'un astérisque (*) pour envoyer votre demande.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              <Button 
+                type="submit" 
+                className="w-full gradient-primary text-white hover:opacity-90 py-3 text-lg"
+                disabled={isLoading || !validateForm()}
+              >
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Envoi en cours...
+                  </div>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-5 w-5" />
+                    Envoyer ma Demande
+                  </>
+                )}
+              </Button>
+              
+              <p className="text-sm text-gray-500 text-center mt-3">
+                En envoyant cette demande, vous acceptez d'être contacté par notre équipe pour finaliser votre projet.
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
+            </CardContent>
+          </Card>
+        </form>
+      </div>
     </div>
   );
 };

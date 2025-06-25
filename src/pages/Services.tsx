@@ -1,135 +1,129 @@
 
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Calendar, Heart, Users, Star, CheckCircle } from 'lucide-react';
 
 const Services = () => {
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
   const services = [
     {
       id: 1,
-      title: "Décoration de Mariage",
-      description: "Transformez votre jour J en un moment magique avec nos décorations de mariage sur mesure.",
-      longDescription: "Nos experts créent une ambiance romantique et élégante pour votre mariage. De la cérémonie à la réception, chaque détail est pensé pour refléter votre amour unique.",
-      image: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=600&h=400&fit=crop",
-      price: "À partir de 1 500€",
-      features: [
-        "Consultation personnalisée",
-        "Décoration florale premium",
-        "Éclairage d'ambiance",
-        "Mobilier de réception",
-        "Coordination le jour J"
-      ],
-      duration: "Journée complète",
-      category: "Mariage"
+      category: 'mariage',
+      title: "Pack Mariage Essentiel",
+      description: "Décoration complète pour votre jour J avec fleurs, éclairage et mobilier.",
+      price: "1 500€",
+      duration: "8 heures",
+      image: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=500&h=300&fit=crop",
+      features: ["Décoration florale", "Éclairage d'ambiance", "Mobilier de réception", "Coordination jour J"],
+      popular: true
     },
     {
       id: 2,
-      title: "Événements Corporatifs",
-      description: "Créez une impression durable avec nos services de décoration pour événements d'entreprise.",
-      longDescription: "Renforcez votre image de marque avec des événements corporatifs impeccables. Séminaires, lancements de produits, galas d'entreprise - nous gérons tout.",
-      image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=600&h=400&fit=crop",
-      price: "À partir de 800€",
-      features: [
-        "Branding personnalisé",
-        "Décoration professionnelle",
-        "Équipement audiovisuel",
-        "Signalétique",
-        "Service traiteur"
-      ],
-      duration: "Demi-journée à plusieurs jours",
-      category: "Corporate"
+      category: 'mariage',
+      title: "Pack Mariage Premium",
+      description: "Expérience de luxe avec décoration sur-mesure et service complet.",
+      price: "3 500€",
+      duration: "12 heures", 
+      image: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=500&h=300&fit=crop",
+      features: ["Tout du pack Essentiel", "Décoration personnalisée", "Photographe inclus", "Traiteur partenaire"]
     },
     {
       id: 3,
-      title: "Anniversaires",
-      description: "Célébrez vos moments spéciaux avec des décorations festives et personnalisées.",
-      longDescription: "Que ce soit pour un anniversaire enfant ou adulte, nous créons une ambiance unique qui fera de cette journée un souvenir inoubliable.",
-      image: "https://images.unsplash.com/photo-1472396961693-142e6e269027?w=600&h=400&fit=crop",
-      price: "À partir de 400€",
-      features: [
-        "Thème personnalisé",
-        "Décoration de table",
-        "Ballons et guirlandes",
-        "Animation décor",
-        "Photos souvenirs"
-      ],
-      duration: "Demi-journée",
-      category: "Anniversaire"
+      category: 'corporate',
+      title: "Événement Corporatif",
+      description: "Solutions professionnelles pour vos événements d'entreprise.",
+      price: "800€",
+      duration: "6 heures",
+      image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=500&h=300&fit=crop",
+      features: ["Branding événementiel", "Mobilier moderne", "Éclairage professionnel", "Support technique"]
     },
     {
       id: 4,
-      title: "Baby Shower",
-      description: "Accueillez votre futur bébé avec une décoration douce et élégante.",
-      longDescription: "Créez un moment tendre et mémorable pour célébrer l'arrivée de votre petit trésor avec nos décorations baby shower sur mesure.",
-      image: "https://images.unsplash.com/photo-1500673922987-e212871fec22?w=600&h=400&fit=crop",
-      price: "À partir de 350€",
-      features: [
-        "Couleurs pastels",
-        "Décoration florale douce",
-        "Candy bar",
-        "Photobooth",
-        "Cadeaux souvenirs"
-      ],
-      duration: "Demi-journée",
-      category: "Baby Shower"
+      category: 'anniversaire',
+      title: "Anniversaire Festif",
+      description: "Célébration colorée et joyeuse pour tous les âges.",
+      price: "400€",
+      duration: "4 heures",
+      image: "https://images.unsplash.com/photo-1472396961693-142e6e269027?w=500&h=300&fit=crop",
+      features: ["Décoration thématique", "Ballons et guirlandes", "Éclairage festif", "Coordination"]
     },
     {
       id: 5,
-      title: "Réceptions Privées",
-      description: "Organisez des réceptions privées inoubliables dans une ambiance raffinée.",
-      longDescription: "Dîners de gala, soirées de bienfaisance, réceptions familiales - nous créons l'atmosphère parfaite pour vos événements privés.",
-      image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=600&h=400&fit=crop",
-      price: "À partir de 600€",
-      features: [
-        "Décoration de luxe",
-        "Éclairage sophistiqué",
-        "Mobilier haut de gamme",
-        "Service personnalisé",
-        "Coordination complète"
-      ],
-      duration: "Soirée complète",
-      category: "Réception"
+      category: 'anniversaire',
+      title: "Anniversaire Élégant",
+      description: "Fête sophistiquée avec décoration raffinée.",
+      price: "750€",
+      duration: "6 heures",
+      image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=500&h=300&fit=crop",
+      features: ["Décoration haut de gamme", "Mobilier design", "Éclairage d'ambiance", "Service personnalisé"]
     },
     {
       id: 6,
-      title: "Événements Saisonniers",
-      description: "Célébrez les fêtes et saisons avec des décorations thématiques créatives.",
-      longDescription: "Noël, Halloween, Pâques, été - nous adaptons nos décorations aux saisons et aux fêtes pour créer des ambiances uniques.",
-      image: "https://images.unsplash.com/photo-1472396961693-142e6e269027?w=600&h=400&fit=crop",
-      price: "À partir de 300€",
-      features: [
-        "Thèmes saisonniers",
-        "Décoration intérieur/extérieur",
-        "Accessoires festifs",
-        "Ambiance lumineuse",
-        "Installation rapide"
-      ],
-      duration: "Variable",
-      category: "Saisonnier"
+      category: 'autre',
+      title: "Baby Shower",
+      description: "Célébration douce et chaleureuse pour l'arrivée de bébé.",
+      price: "350€",
+      duration: "3 heures",
+      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=300&fit=crop",
+      features: ["Décoration pastel", "Mobilier adapté", "Animations douces", "Coordination complète"]
     }
   ];
 
+  const categories = [
+    { id: 'all', label: 'Tous les services', icon: Star },
+    { id: 'mariage', label: 'Mariages', icon: Heart },
+    { id: 'corporate', label: 'Corporate', icon: Users },
+    { id: 'anniversaire', label: 'Anniversaires', icon: Calendar },
+    { id: 'autre', label: 'Autres', icon: Star }
+  ];
+
+  const filteredServices = selectedCategory === 'all' 
+    ? services 
+    : services.filter(service => service.category === selectedCategory);
+
   return (
-    <div className="min-h-screen bg-cream">
-      {/* Header Section */}
-      <section className="py-20 bg-gradient-to-r from-rose-gold to-warm-gold">
+    <div className="min-h-screen bg-gradient-to-br from-cream to-soft-pink">
+      {/* Hero Section */}
+      <section className="gradient-primary text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-playfair text-5xl md:text-6xl font-bold text-white mb-6">
+          <h1 className="font-playfair text-5xl md:text-6xl font-bold mb-6">
             Nos Services
           </h1>
-          <p className="text-xl text-white/90 max-w-3xl mx-auto">
+          <p className="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto">
             Découvrez notre gamme complète de services de décoration pour tous vos événements spéciaux
           </p>
         </div>
       </section>
 
-      {/* Services Grid */}
+      {/* Services Section */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Category Tabs */}
+          <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-12">
+            <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full max-w-4xl mx-auto mb-8">
+              {categories.map((category) => (
+                <TabsTrigger key={category.id} value={category.id} className="flex items-center gap-2">
+                  <category.icon className="h-4 w-4" />
+                  <span className="hidden sm:inline">{category.label}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+
+          {/* Services Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service) => (
-              <Card key={service.id} className="hover-lift bg-white border-0 shadow-lg overflow-hidden">
+            {filteredServices.map((service) => (
+              <Card key={service.id} className="hover-lift bg-white border-0 shadow-lg overflow-hidden relative">
+                {service.popular && (
+                  <Badge className="absolute top-4 right-4 z-10 bg-rose-gold text-white">
+                    Populaire
+                  </Badge>
+                )}
                 <div className="aspect-video overflow-hidden">
                   <img 
                     src={service.image} 
@@ -138,54 +132,35 @@ const Services = () => {
                   />
                 </div>
                 <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="font-playfair text-xl text-charcoal">
-                      {service.title}
-                    </CardTitle>
-                    <span className="text-sm bg-rose-gold text-white px-2 py-1 rounded-full">
-                      {service.category}
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-gray-600 mb-4">
+                  <CardTitle className="font-playfair text-2xl text-charcoal">
+                    {service.title}
+                  </CardTitle>
+                  <p className="text-gray-600">
                     {service.description}
                   </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center mb-4">
+                    <div>
+                      <span className="text-2xl font-bold text-rose-gold">{service.price}</span>
+                      <p className="text-sm text-gray-500">{service.duration}</p>
+                    </div>
+                  </div>
                   
-                  <div className="space-y-3 mb-6">
-                    <div>
-                      <span className="font-semibold text-charcoal">Durée: </span>
-                      <span className="text-gray-600">{service.duration}</span>
-                    </div>
-                    
-                    <div>
-                      <span className="font-semibold text-charcoal">Inclus:</span>
-                      <ul className="mt-2 space-y-1">
-                        {service.features.slice(0, 3).map((feature, index) => (
-                          <li key={index} className="text-sm text-gray-600 flex items-center">
-                            <span className="w-1 h-1 bg-rose-gold rounded-full mr-2"></span>
-                            {feature}
-                          </li>
-                        ))}
-                        {service.features.length > 3 && (
-                          <li className="text-sm text-rose-gold">
-                            +{service.features.length - 3} autres services...
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  </div>
+                  <ul className="space-y-2 mb-6">
+                    {service.features.map((feature, index) => (
+                      <li key={index} className="flex items-center text-sm text-gray-600">
+                        <CheckCircle className="h-4 w-4 text-rose-gold mr-2 flex-shrink-0" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-rose-gold font-bold text-lg">
-                      {service.price}
-                    </span>
-                    <Link to={`/services/${service.id}`}>
-                      <Button className="bg-rose-gold hover:bg-rose-gold/90 text-white">
-                        Voir détails
-                      </Button>
-                    </Link>
-                  </div>
+                  <Link to="/reservations" className="w-full">
+                    <Button className="w-full gradient-primary text-white hover:opacity-90">
+                      Réserver ce service
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             ))}
@@ -196,23 +171,18 @@ const Services = () => {
       {/* CTA Section */}
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="font-playfair text-4xl font-bold text-charcoal mb-6">
+          <h2 className="font-playfair text-4xl md:text-5xl font-bold text-charcoal mb-6">
             Besoin d'un Service Personnalisé ?
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Chaque événement est unique. Contactez-nous pour discuter de vos besoins spécifiques et créer ensemble votre projet sur mesure.
+            Contactez-nous pour discuter de vos besoins spécifiques et obtenir un devis sur mesure
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/reservations">
-              <Button size="lg" className="bg-rose-gold hover:bg-rose-gold/90 text-white px-8 py-4">
-                <Calendar className="mr-2 h-5 w-5" />
-                Faire une Demande
-              </Button>
-            </Link>
-            <Button variant="outline" size="lg" className="border-rose-gold text-rose-gold hover:bg-rose-gold hover:text-white px-8 py-4">
-              Obtenir un Devis
+          <Link to="/reservations">
+            <Button size="lg" className="gradient-primary text-white px-8 py-4 text-lg hover:opacity-90">
+              <Calendar className="mr-2 h-5 w-5" />
+              Demander un Devis
             </Button>
-          </div>
+          </Link>
         </div>
       </section>
     </div>

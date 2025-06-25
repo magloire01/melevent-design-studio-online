@@ -104,7 +104,15 @@
 
 @layer components {
   .gradient-text {
-    @apply bg-gradient-to-r from-rose-gold to-warm-gold bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-rose-300 via-rose-gold to-pink-400 bg-clip-text text-transparent;
+  }
+  
+  .gradient-bg {
+    @apply bg-gradient-to-br from-rose-200 via-pink-100 to-rose-300;
+  }
+  
+  .gradient-primary {
+    @apply bg-gradient-to-r from-rose-gold via-pink-400 to-rose-500;
   }
   
   .hover-lift {

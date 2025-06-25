@@ -4,9 +4,12 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, User } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
+import { UserPlus, Mail, Lock, User, Eye, EyeOff, Phone } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -17,179 +20,228 @@ const Register = () => {
     password: '',
     confirmPassword: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    if (error) setError('');
+  };
+
+  const validateForm = () => {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword) {
+      return 'Veuillez remplir tous les champs obligatoires';
+    }
+
+    if (!formData.email.includes('@')) {
+      return 'Veuillez entrer une adresse email valide';
+    }
+
+    if (formData.password.length < 6) {
+      return 'Le mot de passe doit contenir au moins 6 caractères';
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      return 'Les mots de passe ne correspondent pas';
+    }
+
+    if (!acceptTerms) {
+      return 'Veuillez accepter les conditions d\'utilisation';
+    }
+
+    return '';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Erreur",
-        description: "Les mots de passe ne correspondent pas",
-        variant: "destructive"
-      });
+    setIsLoading(true);
+    setError('');
+
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      setIsLoading(false);
       return;
     }
 
-    setIsLoading(true);
-
-    // Simulation d'une inscription
-    setTimeout(() => {
-      console.log('Données d\'inscription:', formData);
+    try {
+      // Simulation d'une inscription
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       toast({
         title: "Inscription réussie !",
-        description: "Bienvenue dans la famille MelEvent",
+        description: "Votre compte a été créé avec succès. Bienvenue sur MelEvent !",
       });
+
+      console.log('Inscription réussie avec:', formData);
+      
+    } catch (err) {
+      setError('Erreur lors de l\'inscription. Veuillez réessayer.');
+    } finally {
       setIsLoading(false);
-      // Ici vous pouvez rediriger l'utilisateur ou gérer l'authentification
-    }, 1500);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-      <div className="max-w-md w-full space-y-8">
-        {/* Logo */}
+    <div className="min-h-screen gradient-bg flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md space-y-8">
+        {/* Header */}
         <div className="text-center">
-          <Link to="/" className="inline-flex items-center space-x-2">
-            <Calendar className="h-12 w-12 text-rose-gold" />
-            <span className="font-playfair text-3xl font-bold gradient-text">
-              MelEvent
-            </span>
-          </Link>
-          <h2 className="mt-6 font-playfair text-3xl font-bold text-charcoal">
-            Rejoignez-nous !
-          </h2>
-          <p className="mt-2 text-gray-600">
-            Créez votre compte pour commencer à organiser vos événements
+          <h1 className="font-playfair text-4xl font-bold text-charcoal mb-2">
+            Inscription
+          </h1>
+          <p className="text-gray-600">
+            Rejoignez MelEvent et créez vos événements de rêve
           </p>
         </div>
 
-        {/* Formulaire d'inscription */}
-        <Card className="bg-white shadow-xl border-0">
+        {/* Register Card */}
+        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
           <CardHeader className="space-y-1">
-            <CardTitle className="font-playfair text-2xl text-center text-charcoal">
-              Créer un Compte
+            <CardTitle className="text-2xl font-playfair text-center text-charcoal">
+              Créer un compte
             </CardTitle>
             <CardDescription className="text-center">
-              Remplissez le formulaire pour créer votre compte MelEvent
+              Remplissez les informations ci-dessous pour commencer
             </CardDescription>
           </CardHeader>
-          <CardContent>
+
+          <CardContent className="space-y-4">
+            {error && (
+              <Alert className="border-destructive/50 text-destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-charcoal font-medium">
-                    Prénom
-                  </Label>
-                  <Input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
-                    required
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold"
-                    placeholder="Marie"
-                  />
+                  <Label htmlFor="firstName">Prénom *</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="firstName"
+                      name="firstName"
+                      type="text"
+                      placeholder="Prénom"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-charcoal font-medium">
-                    Nom
-                  </Label>
+                  <Label htmlFor="lastName">Nom *</Label>
                   <Input
                     id="lastName"
                     name="lastName"
                     type="text"
-                    required
+                    placeholder="Nom"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold"
-                    placeholder="Dupont"
+                    required
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-charcoal font-medium">
-                  Adresse email
-                </Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold"
-                  placeholder="marie.dupont@email.com"
-                />
+                <Label htmlFor="email">Adresse email *</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="votre@email.com"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="pl-10"
+                    required
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-charcoal font-medium">
-                  Téléphone
-                </Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold"
-                  placeholder="+33 1 23 45 67 89"
-                />
+                <Label htmlFor="phone">Téléphone</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    placeholder="+33 1 23 45 67 89"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="pl-10"
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-charcoal font-medium">
-                  Mot de passe
-                </Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold"
-                  placeholder="••••••••"
-                />
+                <Label htmlFor="password">Mot de passe *</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Au moins 6 caractères"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className="pl-10 pr-10"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-charcoal font-medium">
-                  Confirmer le mot de passe
-                </Label>
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className="border-gray-300 focus:border-rose-gold focus:ring-rose-gold"
-                  placeholder="••••••••"
-                />
+                <Label htmlFor="confirmPassword">Confirmer le mot de passe *</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Répétez votre mot de passe"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className="pl-10 pr-10"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
 
-              <div className="flex items-center">
-                <input
-                  id="terms"
-                  name="terms"
-                  type="checkbox"
-                  required
-                  className="h-4 w-4 text-rose-gold focus:ring-rose-gold border-gray-300 rounded"
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="terms" 
+                  checked={acceptTerms}
+                  onCheckedChange={setAcceptTerms}
                 />
-                <label htmlFor="terms" className="ml-2 block text-sm text-gray-600">
+                <Label htmlFor="terms" className="text-sm">
                   J'accepte les{' '}
                   <a href="#" className="text-rose-gold hover:text-rose-gold/80">
                     conditions d'utilisation
@@ -198,33 +250,47 @@ const Register = () => {
                   <a href="#" className="text-rose-gold hover:text-rose-gold/80">
                     politique de confidentialité
                   </a>
-                </label>
+                </Label>
               </div>
 
-              <Button
-                type="submit"
+              <Button 
+                type="submit" 
+                className="w-full gradient-primary text-white hover:opacity-90" 
+                size="lg"
                 disabled={isLoading}
-                className="w-full bg-rose-gold hover:bg-rose-gold/90 text-white py-3"
               >
                 {isLoading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Création en cours...
+                  </div>
                 ) : (
                   <>
-                    <User className="mr-2 h-5 w-5" />
-                    Créer mon Compte
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Créer mon compte
                   </>
                 )}
               </Button>
             </form>
+          </CardContent>
 
-            <div className="mt-6 text-center">
-              <span className="text-gray-600">Vous avez déjà un compte ? </span>
+          <CardFooter className="flex flex-col space-y-4">
+            <Separator />
+            <div className="text-center text-sm text-gray-600">
+              Déjà un compte ?{' '}
               <Link to="/login" className="text-rose-gold hover:text-rose-gold/80 font-medium">
                 Se connecter
               </Link>
             </div>
-          </CardContent>
+          </CardFooter>
         </Card>
+
+        {/* Back to Home */}
+        <div className="text-center">
+          <Link to="/" className="text-rose-gold hover:text-rose-gold/80 text-sm">
+            ← Retour à l'accueil
+          </Link>
+        </div>
       </div>
     </div>
   );
